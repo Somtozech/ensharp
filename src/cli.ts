@@ -15,9 +15,12 @@ program
 			await convert(input, output);
 			console.log('Conversion Successful');
 		} catch (error) {
-			process.exitCode = 2;
-
-			console.log(error.message);
+			if (error.name === 'EnsharpError') {
+				console.error(error.message);
+				process.exitCode = 1;
+			} else {
+				throw error;
+			}
 		}
 	});
 
