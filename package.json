@@ -37,6 +37,8 @@
 	},
 	"homepage": "https://github.com/Somtozech/ensharp#readme",
 	"devDependencies": {
+		"@types/is-glob": "^4.0.1",
+		"@types/minimatch": "^3.0.3",
 		"@types/node": "^14.14.20",
 		"@types/sharp": "^0.27.1",
 		"rimraf": "^3.0.2",
@@ -44,6 +46,8 @@
 	},
 	"dependencies": {
 		"commander": "^6.2.1",
+		"is-glob": "^4.0.1",
+		"minimatch": "^3.0.4",
 		"sharp": "^0.27.0"
 	}
 }
