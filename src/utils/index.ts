@@ -5,6 +5,19 @@ import normalize from './normalize';
 import { promises as fs, statSync } from 'fs';
 import EnsharpError from './error';
 
+export const selectProperties = (obj: any, properties: string) => {
+	const result: any = {};
+	const props = properties.split(',').map((p) => p.trim());
+
+	for (let prop of props) {
+		if (typeof obj[prop] !== 'undefined') {
+			result[prop] = obj[prop];
+		}
+	}
+
+	return result;
+};
+
 export const getAbsolutePath = (name: string): string => {
 	name = normalize(name);
 	if (path.isAbsolute(name)) {

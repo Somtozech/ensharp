@@ -1,6 +1,8 @@
 import commander from 'commander';
-import convert from './convert';
 import path from 'path';
+import convert from './convert';
+import resize from './resize';
+import { selectProperties } from './utils';
 
 const pkg = require(path.join(__dirname, `../package.json`));
 
@@ -50,6 +52,26 @@ program
 		'-bg, --background <color>',
 		'Background color when fit is `cover` or `contain`. Accepts hex color codes, RGB and HSL values'
 	)
-	.action((input, options) => {});
+	.action(async (input, opts) => {
+		const options = selectProperties(
+			opts,
+			'width, height, sizes, fit, position, background'
+		);
+
+		if (options.width) options.width = Number.parseInt(options.width);
+		if (options.height) options.height = Number.parseInt(options.height);
+
+		try {
+			await resize(input, options);
+			console.log('Resizing was successful');
+		} catch (error) {
+			if (error.name === 'EnsharpError') {
+				console.error(error.message);
+				process.exitCode = 1;
+			} else {
+				throw error;
+			}
+		}
+	});
 
 program.parse(process.argv);
