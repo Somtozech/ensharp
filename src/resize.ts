@@ -1,6 +1,13 @@
 import sharp from 'sharp';
 import path from 'path';
-import { getAbsolutePath, makeDir } from './utils';
+import {
+	getAbsolutePath,
+	makeDir,
+	isGlob,
+	parseSizes,
+	selectProperties,
+	matchGlobPatterns,
+} from './utils';
 import EnsharpError from './utils/error';
 
 type ResizeFitOptions = 'cover' | 'fill' | 'contain' | 'inside' | 'outside';
@@ -39,15 +46,61 @@ const resize: Resize = async function (
 		);
 	}
 
-	const source = getAbsolutePath(inputFilePath);
-	const { name, ext, dir } = path.parse(source);
-	const destination = path.join(dir, 'resized', `${name}${ext}`);
+	if (!options.width && !options.height) {
+		throw new EnsharpError(
+			'Invalid: At least one of width or height is required for resizing'
+		);
+	}
 
-	const { sizes, ...sharpOptions } = options;
+	const inputPath = getAbsolutePath(inputFilePath);
 
-	await makeDir(path.dirname(destination));
+	const {
+		sizes,
+		width: inputWidth,
+		height: inputHeight,
+		...sharpOptions
+	} = options;
 
-	await sharp(source).resize(sharpOptions).toFile(destination);
+	let sources: Array<string>;
+	let imageSizes: Array<{ width?: number; height?: number }>;
+	let isMultiple = false;
+
+	if (isGlob(inputFilePath)) {
+		sources = await matchGlobPatterns(inputPath);
+		isMultiple = true;
+	} else {
+		sources = [inputPath];
+	}
+
+	if (sources.length === 0) {
+		throw new EnsharpError(
+			`No image with pattern ${inputFilePath} was matched at \`${path.dirname(
+				inputPath
+			)}\``
+		);
+	}
+
+	if (sizes) {
+		imageSizes = parseSizes(sizes);
+	} else {
+		imageSizes = [selectProperties(options, 'width, height')];
+	}
+
+	for (let source of sources) {
+		for (let size of imageSizes) {
+			const { name, ext, dir } = path.parse(source);
+			const { width = '_', height = '_' } = size;
+			const filename = `${name}.${width}x${height}${ext}`;
+			const baseDir = isMultiple ? name : '';
+			const destination = path.join(dir, 'resized', baseDir, filename);
+
+			await makeDir(path.dirname(destination));
+
+			await sharp(source)
+				.resize({ ...sharpOptions, ...size })
+				.toFile(destination);
+		}
+	}
 };
 
 export default resize;

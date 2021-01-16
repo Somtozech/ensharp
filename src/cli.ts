@@ -22,12 +22,7 @@ program
 				console.log(`${source} -> ${destinations[i]}`);
 			});
 		} catch (error) {
-			if (error.name === 'EnsharpError') {
-				console.error(error.message);
-				process.exitCode = 1;
-			} else {
-				throw error;
-			}
+			errorHandler(error);
 		}
 	});
 
@@ -37,7 +32,7 @@ program
 	.option('-w, --width <number>', 'width of the resulting image in pixel')
 	.option('-h, --height <number>', 'height of the resulting image in pixel')
 	.option(
-		'--sizes',
+		'--sizes <widthxheight>',
 		'Specify multiple sizes for resizing eg `720x360,480x360,1080x720`'
 	)
 	.option(
@@ -53,25 +48,40 @@ program
 		'Background color when fit is `cover` or `contain`. Accepts hex color codes, RGB and HSL values'
 	)
 	.action(async (input, opts) => {
-		const options = selectProperties(
-			opts,
-			'width, height, sizes, fit, position, background'
-		);
+		const options = selectProperties(opts, 'sizes, fit, position, background');
 
-		if (options.width) options.width = Number.parseInt(options.width);
-		if (options.height) options.height = Number.parseInt(options.height);
+		// make sure width and height are numbers before passing them as option
+		if (opts.width && !Number.isNaN(parseInt(opts.width))) {
+			options.width = Number.parseInt(opts.width);
+		}
+
+		if (opts.height && !Number.isNaN(parseInt(opts.height))) {
+			options.height = Number.parseInt(opts.height);
+		}
 
 		try {
 			await resize(input, options);
 			console.log('Resizing was successful');
 		} catch (error) {
-			if (error.name === 'EnsharpError') {
-				console.error(error.message);
-				process.exitCode = 1;
-			} else {
-				throw error;
-			}
+			errorHandler(error);
 		}
 	});
+
+function errorHandler(error: Error) {
+	process.exitCode = 1;
+
+	if (error.name === 'EnsharpError') {
+		console.error(error.message);
+	} else {
+		throw error;
+	}
+
+	error.message && console.error(error.message);
+	console.error('', 'lounger:', pkg.version, 'node:', process.version);
+	console.error(
+		'',
+		'please open an issue including this log on ' + pkg.bugs.url
+	);
+}
 
 program.parse(process.argv);

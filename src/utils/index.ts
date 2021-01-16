@@ -87,3 +87,29 @@ export const isSameExtension = (
 ): Boolean => {
 	return path.parse(source).ext === path.parse(destination).ext;
 };
+
+export const parseSizes = (
+	sizes: string
+): Array<{ width?: number; height?: number }> => {
+	// ["900x200", "200x100"] -> [{width:900, height: 200}, {width: 200, height: 100}]
+
+	if (sizes.length === 0) return [];
+	const result = [];
+	const imageSizes = sizes.split(',').map((s) => s.trim().split('x'));
+
+	for (let [width, height] of imageSizes) {
+		const properties: { width?: number; height?: number } = {};
+
+		if (width && !Number.isNaN(parseInt(width))) {
+			properties.width = parseInt(width);
+		}
+
+		if (height && !Number.isNaN(parseInt(height))) {
+			properties.height = parseInt(height);
+		}
+
+		if (Object.keys(properties).length > 0) result.push(properties);
+	}
+
+	return result;
+};
