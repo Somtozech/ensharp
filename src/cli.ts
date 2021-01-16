@@ -75,13 +75,6 @@ function errorHandler(error: Error) {
 	} else {
 		throw error;
 	}
-
-	error.message && console.error(error.message);
-	console.error('', 'lounger:', pkg.version, 'node:', process.version);
-	console.error(
-		'',
-		'please open an issue including this log on ' + pkg.bugs.url
-	);
 }
 
 program.parse(process.argv);

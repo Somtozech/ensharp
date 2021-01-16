@@ -7,6 +7,7 @@ import {
 	parseSizes,
 	selectProperties,
 	matchGlobPatterns,
+	isFile,
 } from './utils';
 import EnsharpError from './utils/error';
 
@@ -87,6 +88,12 @@ const resize: Resize = async function (
 	}
 
 	for (let source of sources) {
+		if (!isFile(source)) {
+			throw new EnsharpError(
+				`INVALID PATH: input file path dosen't point to a file`
+			);
+		}
+
 		for (let size of imageSizes) {
 			const { name, ext, dir } = path.parse(source);
 			const { width = '_', height = '_' } = size;
