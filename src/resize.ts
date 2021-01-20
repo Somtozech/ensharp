@@ -47,7 +47,7 @@ const resize: Resize = async function (
 		);
 	}
 
-	if (!options.width && !options.height) {
+	if (!options.width && !options.height && !options?.sizes?.length) {
 		throw new EnsharpError(
 			'Invalid: At least one of width or height is required for resizing'
 		);

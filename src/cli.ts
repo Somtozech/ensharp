@@ -12,7 +12,7 @@ program.version(pkg.version);
 
 program
 	.command('convert <input> <output>')
-	.description('Convert an Input File to another file in a different format.')
+	.description('Convert an image from one format to another.')
 	.action(async (input, output) => {
 		try {
 			const { sources, destinations } = await convert(input, output);

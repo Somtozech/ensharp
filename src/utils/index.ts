@@ -5,8 +5,11 @@ import normalize from './normalize';
 import { promises as fs, statSync } from 'fs';
 import EnsharpError from './error';
 
-export const selectProperties = (obj: any, properties: string) => {
+export const selectProperties = (obj: any, properties: string = '') => {
 	const result: any = {};
+
+	if (!properties.length) return {};
+
 	const props = properties.split(',').map((p) => p.trim());
 
 	for (let prop of props) {
@@ -18,7 +21,7 @@ export const selectProperties = (obj: any, properties: string) => {
 	return result;
 };
 
-export const getAbsolutePath = (name: string): string => {
+export const getAbsolutePath = (name: string = ''): string => {
 	name = normalize(name);
 	if (path.isAbsolute(name)) {
 		return name;
@@ -82,9 +85,10 @@ export const matchGlobPatterns = async (globPath: string) => {
 };
 
 export const isSameExtension = (
-	source: string,
-	destination: string
+	source: string = '',
+	destination: string = ''
 ): Boolean => {
+	if (!source.length || !destination.length) return false;
 	return path.parse(source).ext === path.parse(destination).ext;
 };
 
